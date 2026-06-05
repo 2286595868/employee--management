@@ -1,0 +1,10 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: #111827;
+  font-family: Arial, "Microsoft YaHei", sans-serif;
+  background: #f5f7fb;
+}

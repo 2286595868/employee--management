@@ -1,0 +1,37 @@
+CREATE DATABASE IF NOT EXISTS employee_management
+    DEFAULT CHARACTER SET utf8mb4
+    DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE employee_management;
+
+CREATE TABLE IF NOT EXISTS employee (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '员工ID',
+    employee_no VARCHAR(32) NOT NULL COMMENT '员工编号',
+    name VARCHAR(50) NOT NULL COMMENT '员工姓名',
+    gender TINYINT NOT NULL DEFAULT 0 COMMENT '性别：0未知，1男，2女',
+    phone VARCHAR(20) DEFAULT NULL COMMENT '手机号',
+    email VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+    department_id BIGINT DEFAULT NULL COMMENT '部门ID',
+    position VARCHAR(50) DEFAULT NULL COMMENT '职位',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1在职，0离职',
+    hire_date DATE DEFAULT NULL COMMENT '入职日期',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0否，1是',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_employee_no (employee_no),
+    KEY idx_department_id (department_id),
+    KEY idx_name (name),
+    KEY idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='员工表';
+
+CREATE TABLE IF NOT EXISTS department (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '部门ID',
+    name VARCHAR(50) NOT NULL COMMENT '部门名称',
+    parent_id BIGINT DEFAULT NULL COMMENT '父部门ID',
+    sort_order INT NOT NULL DEFAULT 0 COMMENT '排序',
+    status TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用，0禁用',
+    deleted TINYINT NOT NULL DEFAULT 0 COMMENT '是否删除：0否，1是',
+    create_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    update_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='部门表';
