@@ -1,10 +1,10 @@
 <template>
   <AppShell>
-    <HomeView />
+    <EmployeeListView />
   </AppShell>
 </template>
 
 <script setup>
 import AppShell from './components/AppShell.vue'
-import HomeView from './views/HomeView.vue'
+import EmployeeListView from './views/EmployeeListView.vue'
 </script>
