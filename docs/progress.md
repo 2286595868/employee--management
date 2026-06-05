@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-Sprint 0 项目初始化已完成。
+Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 审核。
 
 ## 已完成
 
@@ -27,27 +27,47 @@ Sprint 0 项目初始化已完成。
 - 完成 GET /api/health 实际 HTTP 验证
 - 完成前端依赖安装
 - 完成前端生产构建验证
+- Sprint 0 已通过 review-agent 复审
+- 创建 Sprint 1 后端基础计划
+- 补充 docs/design/backend.md 后端工程规范
+- 补充 docs/quality/testing.md 测试规范
+- 增加 Spring Boot Validation 依赖
+- 完善 Spring Boot 数据库连接配置，支持 DB_URL、DB_USERNAME、DB_PASSWORD 环境变量覆盖
+- 完善 MyBatis 基础配置，包含 mapper XML 扫描、Entity 类型别名包和下划线转驼峰
+- 增加 MyBatis Mapper 扫描配置
+- 完善统一响应结构，支持成功和失败响应
+- 增加统一错误码定义
+- 增加业务异常基础类型
+- 增加全局异常处理，覆盖参数校验异常、业务异常和系统异常
+- 增加参数校验分组基础结构
+- 保留 GET /api/health 健康检查接口
+- 补充健康检查和全局异常处理测试
+- 完成 Sprint 1 后端测试验证
+- 完成 Sprint 1 后端启动验证
+- 完成 Sprint 1 GET /api/health 实际 HTTP 验证
 
 ## 未完成
 
 - 尚未实现员工 CRUD
 - 尚未实现部门业务接口
-- 尚未实现全局异常处理
-- 尚未实现数据库连接验证
-- 尚未进行代码审核
+- 尚未实现登录和权限
+- 尚未实现前端员工页面
+- 尚未执行 MySQL 8 真实数据库连接验证
 
 ## 下一步
 
-使用 review-agent 审核 Sprint 0。
+使用 review-agent 审核 Sprint 1。
 
-审核通过后，使用 plan-agent 规划 Sprint 1：员工管理后端基础功能。
+审核通过后，再使用 plan-agent 规划员工管理后端业务 Sprint。
 
-Sprint 1 建议只做：
+下一阶段建议只在 Sprint Contract 明确后再实现：
 
-1. 后端员工分页查询
-2. 后端员工新增
-3. 后端员工逻辑删除
-4. 必要的 Service 测试
+1. 员工分页查询
+2. 员工新增
+3. 员工编辑
+4. 员工逻辑删除
+5. 部门列表接口
+6. 必要的 Service、Controller、Mapper 测试
 
 ## 验证情况
 
@@ -59,13 +79,14 @@ Sprint 1 建议只做：
 - npm install：通过。
 - npm run build：通过。
 - backend Maven Wrapper：已补充。
-- ./mvnw test：通过，1 个测试通过。
+- ./mvnw test：通过，4 个测试通过。
 - ./mvnw spring-boot:run：通过，后端成功启动在 8080。
 - curl http://localhost:8080/api/health：通过，返回 {"code":0,"message":"success","data":{"status":"UP"}}。
+- mysql --version：可执行，但当前客户端为 MySQL 5.7.24，不是项目要求的 MySQL 8。
 
 当前未完成：
 
-- MySQL 脚本执行：未执行，本 Sprint 允许只创建 SQL 脚本。
+- MySQL 8 真实数据库连接验证：未执行，当前环境只确认存在 MySQL 5.7 客户端，未确认可用 MySQL 8 服务、employee_management 数据库和连接凭据。
 
 后续验证方式：
 
@@ -88,4 +109,4 @@ Sprint 1 建议只做：
 1. mysql -u root -p < scripts/init-database.sql
 2. 对照 docs/design/database.md 和 docs/generated/db-schema.md
 
-本次执行未强制连接真实 MySQL。
+本次 Sprint 1 未实现员工 CRUD、部门业务接口、前端员工页面、登录和权限。
