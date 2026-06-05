@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.employee.mapper.DepartmentMapper">
+
+    <resultMap id="DepartmentResultMap" type="com.example.employee.entity.Department">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="status" property="status"/>
+        <result column="deleted" property="deleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="DepartmentResultMap">
+        select id, name, parent_id, sort_order, status, deleted, create_time, update_time
+        from department
+        where id = #{id}
+    </select>
+
+    <select id="selectByIds" resultMap="DepartmentResultMap">
+        select id, name, parent_id, sort_order, status, deleted, create_time, update_time
+        from department
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectActiveForDropdown" resultMap="DepartmentResultMap">
+        select id, name, parent_id, sort_order, status, deleted, create_time, update_time
+        from department
+        where deleted = 0
+          and status = 1
+        order by sort_order asc, id asc
+    </select>
+</mapper>

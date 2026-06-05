@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.employee.mapper.EmployeeMapper">
+
+    <resultMap id="EmployeeResultMap" type="com.example.employee.entity.Employee">
+        <id column="id" property="id"/>
+        <result column="employee_no" property="employeeNo"/>
+        <result column="name" property="name"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="email" property="email"/>
+        <result column="department_id" property="departmentId"/>
+        <result column="position" property="position"/>
+        <result column="status" property="status"/>
+        <result column="hire_date" property="hireDate"/>
+        <result column="deleted" property="deleted"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="EmployeeWhere">
+        <where>
+            deleted = 0
+            <if test="query.name != null and query.name != ''">
+                and name like concat('%', #{query.name}, '%')
+            </if>
+            <if test="query.departmentId != null">
+                and department_id = #{query.departmentId}
+            </if>
+            <if test="query.status != null">
+                and status = #{query.status}
+            </if>
+        </where>
+    </sql>
+
+    <select id="countByQuery" resultType="long">
+        select count(1)
+        from employee
+        <include refid="EmployeeWhere"/>
+    </select>
+
+    <select id="selectPageByQuery" resultMap="EmployeeResultMap">
+        select id, employee_no, name, gender, phone, email, department_id, position, status, hire_date, deleted, create_time, update_time
+        from employee
+        <include refid="EmployeeWhere"/>
+        order by id desc
+        limit #{pageSize} offset #{offset}
+    </select>
+
+    <select id="selectById" resultMap="EmployeeResultMap">
+        select id, employee_no, name, gender, phone, email, department_id, position, status, hire_date, deleted, create_time, update_time
+        from employee
+        where id = #{id}
+          and deleted = 0
+    </select>
+
+    <select id="countByEmployeeNo" resultType="long">
+        select count(1)
+        from employee
+        where employee_no = #{employeeNo}
+          and deleted = 0
+    </select>
+
+    <select id="countByEmployeeNoExcludeId" resultType="long">
+        select count(1)
+        from employee
+        where employee_no = #{employeeNo}
+          and id &lt;&gt; #{id}
+          and deleted = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into employee (
+            employee_no,
+            name,
+            gender,
+            phone,
+            email,
+            department_id,
+            position,
+            status,
+            hire_date,
+            deleted,
+            create_time,
+            update_time
+        ) values (
+            #{employeeNo},
+            #{name},
+            #{gender},
+            #{phone},
+            #{email},
+            #{departmentId},
+            #{position},
+            #{status},
+            #{hireDate},
+            #{deleted},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <update id="update">
+        update employee
+        set employee_no = #{employeeNo},
+            name = #{name},
+            gender = #{gender},
+            phone = #{phone},
+            email = #{email},
+            department_id = #{departmentId},
+            position = #{position},
+            status = #{status},
+            hire_date = #{hireDate},
+            update_time = #{updateTime}
+        where id = #{id}
+          and deleted = 0
+    </update>
+
+    <update id="logicalDeleteById">
+        update employee
+        set deleted = 1,
+            update_time = #{updateTime}
+        where id = #{id}
+          and deleted = 0
+    </update>
+</mapper>
