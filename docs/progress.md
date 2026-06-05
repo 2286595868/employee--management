@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 审核。
+Sprint 1 后端基础规范、数据库连接准备和 MySQL 8 真实连接验证已完成，待 review-agent 审核。
 
 ## 已完成
 
@@ -45,6 +45,11 @@ Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 
 - 完成 Sprint 1 后端测试验证
 - 完成 Sprint 1 后端启动验证
 - 完成 Sprint 1 GET /api/health 实际 HTTP 验证
+- 完成 MySQL 8.4.8 Server 真实连接验证
+- 创建 employee_management 数据库
+- 执行 scripts/init-database.sql 初始化数据库
+- 验证 employee 和 department 表创建成功
+- 验证 employee 和 department 表关键字段及索引创建成功
 
 ## 未完成
 
@@ -52,7 +57,6 @@ Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 
 - 尚未实现部门业务接口
 - 尚未实现登录和权限
 - 尚未实现前端员工页面
-- 尚未执行 MySQL 8 真实数据库连接验证
 
 ## 下一步
 
@@ -83,10 +87,18 @@ Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 
 - ./mvnw spring-boot:run：通过，后端成功启动在 8080。
 - curl http://localhost:8080/api/health：通过，返回 {"code":0,"message":"success","data":{"status":"UP"}}。
 - mysql --version：可执行，但当前客户端为 MySQL 5.7.24，不是项目要求的 MySQL 8。
+- /usr/local/mysql/bin/mysql --version：通过，当前 MySQL 客户端为 8.4.8 arm64。
+- /usr/local/mysql/bin/mysql -h127.0.0.1 -P3306 -uroot：通过，已连接 MySQL Server 8.4.8。
+- scripts/init-database.sql：通过，已成功执行。
+- SHOW DATABASES LIKE 'employee_management'：通过，employee_management 数据库存在。
+- SHOW TABLES FROM employee_management：通过，department 和 employee 表存在。
+- SHOW COLUMNS FROM employee：通过，字段符合 scripts/init-database.sql。
+- SHOW COLUMNS FROM department：通过，字段符合 scripts/init-database.sql。
+- SHOW INDEX FROM employee 和 SHOW INDEX FROM department：通过，主键和唯一/普通索引已创建。
 
 当前未完成：
 
-- MySQL 8 真实数据库连接验证：未执行，当前环境只确认存在 MySQL 5.7 客户端，未确认可用 MySQL 8 服务、employee_management 数据库和连接凭据。
+- 无 Sprint 1 数据库连接验证遗留问题。
 
 后续验证方式：
 
@@ -110,3 +122,9 @@ Sprint 1 后端基础规范和数据库连接准备已完成，待 review-agent 
 2. 对照 docs/design/database.md 和 docs/generated/db-schema.md
 
 本次 Sprint 1 未实现员工 CRUD、部门业务接口、前端员工页面、登录和权限。
+
+说明：
+
+- 系统默认 `mysql` 命令仍指向 MySQL 5.7.24 客户端。
+- 本次真实验证使用 `/usr/local/mysql/bin/mysql`，对应已安装并启动的 MySQL 8.4.8 Server。
+- 本次未在文档或配置文件中记录本机 MySQL 密码。
