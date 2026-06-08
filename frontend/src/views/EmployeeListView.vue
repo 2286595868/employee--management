@@ -3,8 +3,9 @@
     <div class="page-heading">
       <div>
         <h2>员工管理</h2>
-        <p>查看员工列表并按姓名、部门、状态筛选</p>
+        <p>查看和维护员工信息，并按姓名、部门、状态筛选</p>
       </div>
+      <el-button type="primary" @click="handleCreate">新增员工</el-button>
     </div>
 
     <el-card class="filter-panel" shadow="never">
@@ -92,6 +93,22 @@
         <el-table-column prop="hireDate" label="入职日期" min-width="120">
           <template #default="{ row }">{{ displayValue(row.hireDate) }}</template>
         </el-table-column>
+        <el-table-column label="操作" width="150" fixed="right">
+          <template #default="{ row }">
+            <div class="row-actions">
+              <el-button link type="primary" @click="handleEdit(row)">编辑</el-button>
+              <el-button
+                link
+                type="danger"
+                :loading="deletingEmployeeId === row.id"
+                :disabled="deletingEmployeeId !== null && deletingEmployeeId !== row.id"
+                @click="handleDelete(row)"
+              >
+                删除
+              </el-button>
+            </div>
+          </template>
+        </el-table-column>
       </el-table>
 
       <div class="pagination-row">
@@ -107,14 +124,30 @@
         />
       </div>
     </el-card>
+
+    <EmployeeFormDialog
+      v-model="formDialogVisible"
+      :mode="formMode"
+      :employee="selectedEmployee"
+      :departments="departments"
+      :department-loading="departmentLoading"
+      :submitting="formSubmitting"
+      @submit="handleFormSubmit"
+    />
   </section>
 </template>
 
 <script setup>
 import { onMounted, reactive, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { fetchDepartments } from '../api/departments'
-import { fetchEmployees } from '../api/employees'
+import {
+  createEmployee,
+  deleteEmployee,
+  fetchEmployees,
+  updateEmployee
+} from '../api/employees'
+import EmployeeFormDialog from '../components/EmployeeFormDialog.vue'
 
 const EMPTY_TEXT = '-'
 
@@ -134,6 +167,11 @@ const departments = ref([])
 const employees = ref([])
 const departmentLoading = ref(false)
 const employeeLoading = ref(false)
+const formDialogVisible = ref(false)
+const formMode = ref('create')
+const selectedEmployee = ref(null)
+const formSubmitting = ref(false)
+const deletingEmployeeId = ref(null)
 let latestEmployeeRequest = 0
 
 function displayValue(value) {
@@ -251,6 +289,82 @@ function handlePageSizeChange(pageSize) {
   loadEmployees()
 }
 
+function handleCreate() {
+  formMode.value = 'create'
+  selectedEmployee.value = null
+  formDialogVisible.value = true
+}
+
+function handleEdit(employee) {
+  formMode.value = 'edit'
+  selectedEmployee.value = { ...employee }
+  formDialogVisible.value = true
+}
+
+async function handleFormSubmit(payload) {
+  if (formSubmitting.value) {
+    return
+  }
+
+  formSubmitting.value = true
+
+  try {
+    if (formMode.value === 'edit') {
+      await updateEmployee(selectedEmployee.value.id, payload)
+      ElMessage.success('员工信息更新成功')
+    } else {
+      await createEmployee(payload)
+      pagination.page = 1
+      ElMessage.success('员工新增成功')
+    }
+
+    formDialogVisible.value = false
+    await loadEmployees()
+  } catch (error) {
+    ElMessage.error(error.message || (formMode.value === 'edit' ? '编辑员工失败' : '新增员工失败'))
+  } finally {
+    formSubmitting.value = false
+  }
+}
+
+async function handleDelete(employee) {
+  if (deletingEmployeeId.value !== null) {
+    return
+  }
+
+  deletingEmployeeId.value = employee.id
+
+  try {
+    await ElMessageBox.confirm(
+      `确认删除员工“${employee.name || employee.employeeNo}”（${employee.employeeNo}）吗？`,
+      '删除员工',
+      {
+        confirmButtonText: '删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+  } catch {
+    deletingEmployeeId.value = null
+    return
+  }
+
+  try {
+    await deleteEmployee(employee.id)
+
+    if (employees.value.length === 1 && pagination.page > 1) {
+      pagination.page -= 1
+    }
+
+    ElMessage.success('员工删除成功')
+    await loadEmployees()
+  } catch (error) {
+    ElMessage.error(error.message || '删除员工失败')
+  } finally {
+    deletingEmployeeId.value = null
+  }
+}
+
 onMounted(() => {
   loadDepartments()
   loadEmployees()
@@ -286,6 +400,10 @@ h2 {
 
 .filter-panel {
   margin-bottom: 16px;
+}
+
+.page-heading > .el-button {
+  flex: 0 0 auto;
 }
 
 .filter-form {
@@ -328,6 +446,12 @@ h2 {
   font-weight: 400;
 }
 
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .pagination-row {
   display: flex;
   justify-content: flex-end;
@@ -344,6 +468,10 @@ h2 {
 @media (max-width: 640px) {
   .employee-list-view {
     max-width: none;
+  }
+
+  .page-heading {
+    align-items: center;
   }
 
   .filter-form {
